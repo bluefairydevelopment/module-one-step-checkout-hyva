@@ -119,7 +119,10 @@ class PackageTest extends TestCase
     public function testThereIsNoInlineScriptAndBothScriptsAreLoadedFromTheirModules(): void
     {
         $template = $this->template();
-        preg_match_all('/<script\b[^>]*>(.*?)<\/script>/s', $template, $scripts);
+        // PHP output tags are part of the script tag's attributes: take them out before looking for
+        // where the tag ends, or the "->" inside one is read as its end.
+        $rendered = (string) preg_replace('/<\?=.*?\?>/s', 'PHP', $template);
+        preg_match_all('/<script\b[^>]*>(.*?)<\/script>/s', $rendered, $scripts);
         self::assertCount(2, $scripts[0]);
         self::assertSame(['', ''], $scripts[1], 'no inline script: strict CSP would block it');
         self::assertStringContainsString("getViewFileUrl('BlueFairy_OneStepCheckout::js/osc-core.js')", $template);

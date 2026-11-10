@@ -7,7 +7,7 @@
  * Works under Hyvä's strict CSP (the Alpine CSP build): the component is registered with
  * Alpine.data() by js/osc-alpine.js, and every Alpine attribute here names a property or a
  * method, never an expression. There is no inline script; one added later must be followed by
- * $hyvaCsp->registerInlineScript(). No RequireJS, no Knockout, no data-mage-init.
+ * $hyvaCsp->registerInlineScript(). No RequireJS, no Knockout, no Magento init attributes.
  *
  * The address forms, the stylesheet and the view model are the base module's own.
  */
@@ -19,6 +19,7 @@ declare(strict_types=1);
 /** @var \BlueFairy\OneStepCheckout\ViewModel\CheckoutConfig $viewModel */
 $viewModel = $block->getData('view_model');
 $isLoggedIn = $viewModel->isLoggedIn();
+$accordion = $viewModel->isAccordionMode();
 ?>
 <script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_OneStepCheckout::js/osc-core.js')) ?>"></script>
 <script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_OneStepCheckoutHyva::js/osc-alpine.js')) ?>"></script>
@@ -36,8 +37,12 @@ $isLoggedIn = $viewModel->isLoggedIn();
         <?php if (!$isLoggedIn): ?>
             <section class="bf-osc__section" data-osc-section="contact">
                 <h2 class="bf-osc__section-title">
+                    <?php if ($accordion): ?>
                     <button type="button" class="bf-osc__section-toggle" data-osc-toggle="contact" aria-controls="bf-osc-section-contact"
                             :aria-expanded="contactExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Contact')) ?></button>
+                <?php else: ?>
+                    <span class="bf-osc__section-toggle"><?= $escaper->escapeHtml(__('Contact')) ?></span>
+                <?php endif; ?>
                 </h2>
                 <div class="bf-osc__section-body" id="bf-osc-section-contact" x-show="contactOpen">
                     <div class="bf-osc__field bf-osc__field--full">
@@ -56,8 +61,12 @@ $isLoggedIn = $viewModel->isLoggedIn();
 
         <section class="bf-osc__section" data-osc-section="shipping" x-show="shippingShown">
             <h2 class="bf-osc__section-title">
-                <button type="button" class="bf-osc__section-toggle" data-osc-toggle="shipping" aria-controls="bf-osc-section-shipping"
-                        :aria-expanded="shippingExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Shipping Address')) ?></button>
+                <?php if ($accordion): ?>
+                    <button type="button" class="bf-osc__section-toggle" data-osc-toggle="shipping" aria-controls="bf-osc-section-shipping"
+                            :aria-expanded="shippingExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Shipping Address')) ?></button>
+                <?php else: ?>
+                    <span class="bf-osc__section-toggle"><?= $escaper->escapeHtml(__('Shipping Address')) ?></span>
+                <?php endif; ?>
             </h2>
             <div class="bf-osc__section-body" id="bf-osc-section-shipping" x-show="shippingOpen">
                 <?php if ($isLoggedIn): ?>
@@ -72,13 +81,23 @@ $isLoggedIn = $viewModel->isLoggedIn();
                     </div>
                 <?php endif; ?>
                 <?= $block->getChildHtml('address.shipping') ?>
+                <?php if ($isLoggedIn): ?>
+                    <label class="bf-osc__check" data-osc="save-address-field" x-show="saveAddressShown">
+                        <input type="checkbox" data-osc="save-address" :checked="saveInAddressBook"/>
+                        <span><?= $escaper->escapeHtml(__('Save this address in my address book')) ?></span>
+                    </label>
+                <?php endif; ?>
             </div>
         </section>
 
         <section class="bf-osc__section" data-osc-section="shipping-method" x-show="shippingMethodShown">
             <h2 class="bf-osc__section-title">
-                <button type="button" class="bf-osc__section-toggle" data-osc-toggle="shipping-method" aria-controls="bf-osc-section-shipping-method"
-                        :aria-expanded="shippingMethodExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Shipping Method')) ?></button>
+                <?php if ($accordion): ?>
+                    <button type="button" class="bf-osc__section-toggle" data-osc-toggle="shipping-method" aria-controls="bf-osc-section-shipping-method"
+                            :aria-expanded="shippingMethodExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Shipping Method')) ?></button>
+                <?php else: ?>
+                    <span class="bf-osc__section-toggle"><?= $escaper->escapeHtml(__('Shipping Method')) ?></span>
+                <?php endif; ?>
             </h2>
             <div class="bf-osc__section-body" id="bf-osc-section-shipping-method" x-show="shippingMethodOpen">
                 <div class="bf-osc__options" data-osc="shipping-methods" role="radiogroup" aria-label="<?= $escaper->escapeHtmlAttr(__('Shipping Method')) ?>">
@@ -97,8 +116,12 @@ $isLoggedIn = $viewModel->isLoggedIn();
 
         <section class="bf-osc__section" data-osc-section="payment">
             <h2 class="bf-osc__section-title">
-                <button type="button" class="bf-osc__section-toggle" data-osc-toggle="payment" aria-controls="bf-osc-section-payment"
-                        :aria-expanded="paymentExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Payment')) ?></button>
+                <?php if ($accordion): ?>
+                    <button type="button" class="bf-osc__section-toggle" data-osc-toggle="payment" aria-controls="bf-osc-section-payment"
+                            :aria-expanded="paymentExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Payment')) ?></button>
+                <?php else: ?>
+                    <span class="bf-osc__section-toggle"><?= $escaper->escapeHtml(__('Payment')) ?></span>
+                <?php endif; ?>
             </h2>
             <div class="bf-osc__section-body" id="bf-osc-section-payment" x-show="paymentOpen">
                 <div class="bf-osc__options" data-osc="payment-methods" role="radiogroup" aria-label="<?= $escaper->escapeHtmlAttr(__('Payment Method')) ?>">
@@ -133,8 +156,12 @@ $isLoggedIn = $viewModel->isLoggedIn();
 
         <section class="bf-osc__section" data-osc-section="review">
             <h2 class="bf-osc__section-title">
-                <button type="button" class="bf-osc__section-toggle" data-osc-toggle="review" aria-controls="bf-osc-section-review"
-                        :aria-expanded="reviewExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Review & Place Order')) ?></button>
+                <?php if ($accordion): ?>
+                    <button type="button" class="bf-osc__section-toggle" data-osc-toggle="review" aria-controls="bf-osc-section-review"
+                            :aria-expanded="reviewExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Review & Place Order')) ?></button>
+                <?php else: ?>
+                    <span class="bf-osc__section-toggle"><?= $escaper->escapeHtml(__('Review & Place Order')) ?></span>
+                <?php endif; ?>
             </h2>
             <div class="bf-osc__section-body" id="bf-osc-section-review" x-show="reviewOpen">
                 <?php if ($viewModel->showCoupon()): ?>

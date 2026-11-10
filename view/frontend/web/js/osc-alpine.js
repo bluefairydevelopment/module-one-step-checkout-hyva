@@ -6,7 +6,7 @@
  * Written for Hyvä's strict CSP (the Alpine CSP build): the component is registered with
  * Alpine.data(), and every Alpine attribute in the template names a property or a method of
  * this object, never an expression. Methods that depend on a loop item read it from `this`
- * (this.method, this.row, ...). No RequireJS, no Knockout, no data-mage-init.
+ * (this.method, this.row, ...). No RequireJS, no Knockout, no Magento init attributes.
  *
  * The core keeps plain state; `version` is bumped on each change, and every getter reads it,
  * so Alpine re-evaluates whatever depends on the checkout.
@@ -99,6 +99,9 @@
             get billingSame() { return this.state().billingSame; },
             get billingSameShown() { return !this.state().isVirtual; },
             get billingFormShown() { return this.state().isVirtual || !this.state().billingSame; },
+            get saveInAddressBook() { return this.state().saveInAddressBook; },
+            // Offered for an address typed here; a saved one is in the book already.
+            get saveAddressShown() { return !this.state().isVirtual && !this.state().shipping.customer_address_id; },
 
             // ---- shipping methods ------------------------------------------------------------------
             get shippingRows() { return this.version >= 0 ? this.checkout.shippingRows() : []; },
@@ -107,7 +110,8 @@
             get shippingEmptyText() {
                 var state = this.state();
 
-                return this.checkout.t(state.shipping.country_id && !state.loading ? 'shipping.none' : 'shipping.empty');
+                // "None" only once the server has priced an address; before that nothing was asked.
+                return this.checkout.t(state.rated && !state.loading ? 'shipping.none' : 'shipping.empty');
             },
             optionClass: function () {
                 return this.row.selected ? 'bf-osc__option bf-osc__option--selected' : 'bf-osc__option';
@@ -169,8 +173,7 @@
             },
 
             onChange: function (event) {
-                var self = this,
-                    target = event.target,
+                var target = event.target,
                     kind = target.getAttribute('data-osc');
 
                 if (target.name === 'bf-osc-shipping-method') {
@@ -181,10 +184,12 @@
                     this.checkout.setBillingSame(target.checked);
                 } else if (kind === 'newsletter') {
                     this.checkout.setNewsletter(target.checked);
+                } else if (kind === 'save-address') {
+                    this.checkout.setSaveInAddressBook(target.checked);
                 } else if (kind === 'address-book') {
-                    this.checkout.useCustomerAddress(target.value).then(function () {
-                        self.syncInputs('shipping');
-                    });
+                    // The chosen address is in the state at once; the inputs are filled now and not
+                    // again when the server answers, so nothing typed in the meantime is overwritten.
+                    this.checkout.useCustomerAddress(target.value);
                     this.syncInputs('shipping');
                 } else if (target.hasAttribute('data-osc-agreement')) {
                     this.checkout.setAgreement(target.getAttribute('data-osc-agreement'), target.checked);
@@ -202,11 +207,31 @@
                     if (!self.checkout.state.errors.coupon && input) {
                         input.value = '';
                     }
+                    // The Apply button has just been hidden: keep the keyboard somewhere visible.
+                    self.$nextTick(function () {
+                        var remove = self.$root.querySelector('[data-osc="coupon-remove"]');
+
+                        if (self.checkout.state.couponCode && remove) {
+                            remove.focus();
+                        } else if (input) {
+                            input.focus();
+                        }
+                    });
                 });
             },
 
             removeCoupon: function () {
-                this.checkout.removeCoupon();
+                var self = this;
+
+                this.checkout.removeCoupon().then(function () {
+                    self.$nextTick(function () {
+                        var input = self.$root.querySelector('[data-osc="coupon-input"]');
+
+                        if (!self.checkout.state.couponCode && input) {
+                            input.focus();
+                        }
+                    });
+                });
             },
 
             placeOrder: function () {
@@ -214,12 +239,15 @@
 
                 this.checkout.placeOrder().then(function (placed) {
                     if (placed) {
-                        window.location.assign(self.checkout.config.successUrl);
+                        self.leaveForSuccess();
 
                         return;
                     }
                     self.$nextTick(function () {
-                        var invalid = self.$root.querySelector('[aria-invalid="true"]'),
+                        // The first field in error that is on screen (a region has two controls, one hidden).
+                        var invalid = Array.prototype.filter.call(self.$root.querySelectorAll('[aria-invalid="true"]'), function (node) {
+                                return !node.hidden && !node.closest('[hidden]') && node.offsetParent !== null;
+                            })[0],
                             global = self.$root.querySelector('[data-osc="global-error"]');
 
                         if (self.checkout.state.errors._global && global) {
@@ -229,6 +257,22 @@
                         }
                     });
                 });
+            },
+
+            /**
+             * Go to the success page (or where the payment method sends the shopper). The cart kept
+             * in the browser's private-content store is the one just ordered: drop it first, so the
+             * next page's minicart asks the server instead of showing it.
+             */
+            leaveForSuccess: function () {
+                try {
+                    if (window.hyva && typeof window.hyva.getBrowserStorage === 'function' && window.hyva.getBrowserStorage()) {
+                        window.hyva.getBrowserStorage().removeItem('mage-cache-storage');
+                    }
+                } catch (e) {
+                    // Nothing to drop is no reason to keep the shopper here.
+                }
+                window.location.assign(this.checkout.state.redirectUrl || this.checkout.config.successUrl);
             },
 
             // ---- the parts written to the DOM directly ---------------------------------------------
@@ -315,8 +359,27 @@
             drawErrors: function () {
                 var errors = this.checkout.state.errors;
 
-                Array.prototype.forEach.call(this.$root.querySelectorAll('[data-osc-error]'), function (node) {
-                    node.textContent = errors[node.getAttribute('data-osc-error')] || '';
+                var root = this.$root;
+
+                Array.prototype.forEach.call(root.querySelectorAll('[data-osc-error]'), function (node) {
+                    var message = errors[node.getAttribute('data-osc-error')] || '';
+
+                    // Writing the same text again makes a screen reader announce the alert again.
+                    if (node.textContent !== message) {
+                        node.textContent = message;
+                    }
+                });
+                [['[data-osc="email"]', 'email'], ['[data-osc="po-number"]', 'poNumber'], ['[data-osc="coupon-input"]', 'coupon']].forEach(function (pair) {
+                    var input = root.querySelector(pair[0]);
+
+                    if (!input) {
+                        return;
+                    }
+                    if (errors[pair[1]]) {
+                        input.setAttribute('aria-invalid', 'true');
+                    } else {
+                        input.removeAttribute('aria-invalid');
+                    }
                 });
                 Array.prototype.forEach.call(this.$root.querySelectorAll('[data-osc-address]'), function (form) {
                     var type = form.getAttribute('data-osc-address');
