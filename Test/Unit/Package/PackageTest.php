@@ -55,7 +55,7 @@ class PackageTest extends TestCase
 
     public function testTheLayoutSwapsTheBaseModulesRootTemplateOnHyvaThemes(): void
     {
-        $layout = (string) file_get_contents(self::ROOT . '/view/frontend/layout/hyva_checkout_index_index.xml');
+        $layout = (string) file_get_contents(self::ROOT . '/view/frontend/layout/' . \BlueFairy\OneStepCheckoutHyva\Observer\AddHyvaCheckoutHandle::HANDLE . '.xml');
         self::assertStringContainsString(
             '<referenceBlock name="bluefairy.osc.root" template="BlueFairy_OneStepCheckoutHyva::checkout/osc-root.phtml"/>',
             $layout
