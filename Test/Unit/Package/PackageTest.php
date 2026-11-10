@@ -63,7 +63,15 @@ class PackageTest extends TestCase
             '<referenceBlock name="bluefairy.osc.root" template="BlueFairy_OneStepCheckoutHyva::checkout/osc-root.phtml"/>',
             $layout
         );
-        self::assertSame(1, substr_count($layout, '<referenceBlock'), 'the layout does nothing else on the checkout page');
+        self::assertSame(2, substr_count($layout, '<referenceBlock'), 'the layout does nothing else on the checkout page but remove the theme placeholder');
+    }
+
+    public function testTheLayoutRemovesTheThemesNoCheckoutPlaceholder(): void
+    {
+        $layout = simplexml_load_file(self::ROOT . '/view/frontend/layout/bluefairy_osc_checkout_hyva.xml');
+        $removed = $layout->xpath('//referenceBlock[@name="fallback.module.missing"][@remove="true"]');
+
+        self::assertCount(1, $removed, 'the Hyva theme shows "No Checkout module installed" above the checkout otherwise');
     }
 
     public function testThereIsNoRequireJsKnockoutOrMageInit(): void

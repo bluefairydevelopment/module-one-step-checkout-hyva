@@ -11,5 +11,7 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceBlock name="bluefairy.osc.root" template="BlueFairy_OneStepCheckoutHyva::checkout/osc-root.phtml"/>
+        <!-- The Hyvä theme fills the checkout page with a "No Checkout module installed" notice. -->
+        <referenceBlock name="fallback.module.missing" remove="true"/>
     </body>
 </page>
