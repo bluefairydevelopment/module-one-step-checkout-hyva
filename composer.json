@@ -1,0 +1,23 @@
+{
+    "name": "bluefairy/module-one-step-checkout-hyva",
+    "description": "BlueFairy One Step Checkout - Alpine.js storefront for Hyva themes",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": [
+        "MIT"
+    ],
+    "require": {
+        "php": "^8.3",
+        "bluefairy/module-one-step-checkout": "^1.0",
+        "magento/framework": "~103.0.8",
+        "hyva-themes/magento2-theme-module": "^1.5"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "BlueFairy\\OneStepCheckoutHyva\\": ""
+        }
+    }
+}

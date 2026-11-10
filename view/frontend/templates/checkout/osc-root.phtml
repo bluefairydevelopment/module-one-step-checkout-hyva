@@ -1,0 +1,230 @@
+<?php
+/**
+ * Copyright © 2026 Blue Fairy Development. All rights reserved.
+ *
+ * One Step Checkout for Hyvä themes: Alpine.js over the base module's osc-core.js.
+ *
+ * Works under Hyvä's strict CSP (the Alpine CSP build): the component is registered with
+ * Alpine.data() by js/osc-alpine.js, and every Alpine attribute here names a property or a
+ * method, never an expression. There is no inline script; one added later must be followed by
+ * $hyvaCsp->registerInlineScript(). No RequireJS, no Knockout, no data-mage-init.
+ *
+ * The address forms, the stylesheet and the view model are the base module's own.
+ */
+
+declare(strict_types=1);
+
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+/** @var \BlueFairy\OneStepCheckout\ViewModel\CheckoutConfig $viewModel */
+$viewModel = $block->getData('view_model');
+$isLoggedIn = $viewModel->isLoggedIn();
+?>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_OneStepCheckout::js/osc-core.js')) ?>"></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_OneStepCheckoutHyva::js/osc-alpine.js')) ?>"></script>
+<div id="bf-osc" class="bf-osc<?= $viewModel->isAccordionMode() ? ' bf-osc--accordion' : '' ?>"
+     x-data="bfOscCheckout" :class="rootClass"
+     @input="onInput" @change="onChange" @focusin="onFocusIn"
+     data-bf-osc-config="<?= $escaper->escapeHtmlAttr($viewModel->getJsonConfig()) ?>">
+    <noscript>
+        <p class="bf-osc__error"><?= $escaper->escapeHtml(__('Please enable JavaScript to use the checkout.')) ?></p>
+    </noscript>
+
+    <div class="bf-osc__main">
+        <div class="bf-osc__error" data-osc="global-error" role="alert" tabindex="-1" x-show="hasGlobalError" x-text="globalError" x-cloak></div>
+
+        <?php if (!$isLoggedIn): ?>
+            <section class="bf-osc__section" data-osc-section="contact">
+                <h2 class="bf-osc__section-title">
+                    <button type="button" class="bf-osc__section-toggle" data-osc-toggle="contact" aria-controls="bf-osc-section-contact"
+                            :aria-expanded="contactExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Contact')) ?></button>
+                </h2>
+                <div class="bf-osc__section-body" id="bf-osc-section-contact" x-show="contactOpen">
+                    <div class="bf-osc__field bf-osc__field--full">
+                        <label class="bf-osc__label" for="bf-osc-email"><?= $escaper->escapeHtml(__('Email Address')) ?></label>
+                        <input class="bf-osc__input" type="email" id="bf-osc-email" name="email" maxlength="254"
+                               autocomplete="email" data-osc="email" aria-required="true" aria-describedby="bf-osc-email-error"/>
+                        <div class="bf-osc__field-error" id="bf-osc-email-error" data-osc-error="email" role="alert"></div>
+                    </div>
+                    <p class="bf-osc__note">
+                        <?= $escaper->escapeHtml(__('Already have an account?')) ?>
+                        <a href="<?= $escaper->escapeUrl($viewModel->getLoginUrl()) ?>"><?= $escaper->escapeHtml(__('Sign in')) ?></a>
+                    </p>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <section class="bf-osc__section" data-osc-section="shipping" x-show="shippingShown">
+            <h2 class="bf-osc__section-title">
+                <button type="button" class="bf-osc__section-toggle" data-osc-toggle="shipping" aria-controls="bf-osc-section-shipping"
+                        :aria-expanded="shippingExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Shipping Address')) ?></button>
+            </h2>
+            <div class="bf-osc__section-body" id="bf-osc-section-shipping" x-show="shippingOpen">
+                <?php if ($isLoggedIn): ?>
+                    <div class="bf-osc__field bf-osc__field--full" data-osc="address-book-field" x-show="hasAddressBook">
+                        <label class="bf-osc__label" for="bf-osc-address-book"><?= $escaper->escapeHtml(__('Saved Addresses')) ?></label>
+                        <select class="bf-osc__input" id="bf-osc-address-book" data-osc="address-book">
+                            <option value=""><?= $escaper->escapeHtml(__('New address')) ?></option>
+                            <template x-for="row in addressBookRows" :key="row.id">
+                                <option :value="row.id" :selected="row.selected" x-text="row.label"></option>
+                            </template>
+                        </select>
+                    </div>
+                <?php endif; ?>
+                <?= $block->getChildHtml('address.shipping') ?>
+            </div>
+        </section>
+
+        <section class="bf-osc__section" data-osc-section="shipping-method" x-show="shippingMethodShown">
+            <h2 class="bf-osc__section-title">
+                <button type="button" class="bf-osc__section-toggle" data-osc-toggle="shipping-method" aria-controls="bf-osc-section-shipping-method"
+                        :aria-expanded="shippingMethodExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Shipping Method')) ?></button>
+            </h2>
+            <div class="bf-osc__section-body" id="bf-osc-section-shipping-method" x-show="shippingMethodOpen">
+                <div class="bf-osc__options" data-osc="shipping-methods" role="radiogroup" aria-label="<?= $escaper->escapeHtmlAttr(__('Shipping Method')) ?>">
+                    <p class="bf-osc__empty" x-show="noShippingRows" x-text="shippingEmptyText"></p>
+                    <template x-for="row in shippingRows" :key="row.code">
+                        <label :class="optionClass">
+                            <input type="radio" name="bf-osc-shipping-method" :value="row.code" :checked="row.selected"/>
+                            <span class="bf-osc__option-title" x-text="row.title"></span>
+                            <span class="bf-osc__option-price" x-text="row.price"></span>
+                        </label>
+                    </template>
+                </div>
+                <div class="bf-osc__field-error" data-osc-error="shippingMethod" role="alert"></div>
+            </div>
+        </section>
+
+        <section class="bf-osc__section" data-osc-section="payment">
+            <h2 class="bf-osc__section-title">
+                <button type="button" class="bf-osc__section-toggle" data-osc-toggle="payment" aria-controls="bf-osc-section-payment"
+                        :aria-expanded="paymentExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Payment')) ?></button>
+            </h2>
+            <div class="bf-osc__section-body" id="bf-osc-section-payment" x-show="paymentOpen">
+                <div class="bf-osc__options" data-osc="payment-methods" role="radiogroup" aria-label="<?= $escaper->escapeHtmlAttr(__('Payment Method')) ?>">
+                    <p class="bf-osc__empty" x-show="noPaymentRows"><?= $escaper->escapeHtml(__('No payment methods are available.')) ?></p>
+                    <template x-for="row in paymentRows" :key="row.code">
+                        <label :class="optionClass">
+                            <input type="radio" name="bf-osc-payment-method" :value="row.code" :checked="row.selected"/>
+                            <span class="bf-osc__option-title" x-text="row.title"></span>
+                            <span class="bf-osc__option-extra" x-show="rowHasInfo" x-text="row.info"></span>
+                            <span class="bf-osc__option-extra" x-show="rowNeedsPoNumber">
+                                <label class="bf-osc__label" for="bf-osc-po-number"><?= $escaper->escapeHtml(__('Purchase Order Number')) ?></label>
+                                <input class="bf-osc__input" type="text" id="bf-osc-po-number" maxlength="32" autocomplete="off"
+                                       data-osc="po-number" aria-required="true"/>
+                                <span class="bf-osc__field-error" data-osc-error="poNumber" role="alert"></span>
+                            </span>
+                        </label>
+                    </template>
+                </div>
+                <div class="bf-osc__field-error" data-osc-error="paymentMethod" role="alert"></div>
+                <div class="bf-osc__billing" data-osc="billing">
+                    <label class="bf-osc__check" data-osc="billing-same-field" x-show="billingSameShown">
+                        <input type="checkbox" data-osc="billing-same" :checked="billingSame"/>
+                        <span><?= $escaper->escapeHtml(__('My billing and shipping address are the same')) ?></span>
+                    </label>
+                    <div data-osc="billing-form" x-show="billingFormShown" x-cloak>
+                        <h3 class="bf-osc__subtitle"><?= $escaper->escapeHtml(__('Billing Address')) ?></h3>
+                        <?= $block->getChildHtml('address.billing') ?>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bf-osc__section" data-osc-section="review">
+            <h2 class="bf-osc__section-title">
+                <button type="button" class="bf-osc__section-toggle" data-osc-toggle="review" aria-controls="bf-osc-section-review"
+                        :aria-expanded="reviewExpanded" @click="toggleSection"><?= $escaper->escapeHtml(__('Review & Place Order')) ?></button>
+            </h2>
+            <div class="bf-osc__section-body" id="bf-osc-section-review" x-show="reviewOpen">
+                <?php if ($viewModel->showCoupon()): ?>
+                    <div class="bf-osc__coupon" data-osc="coupon">
+                        <div class="bf-osc__coupon-form" data-osc="coupon-form" x-show="noCoupon">
+                            <label class="bf-osc__label" for="bf-osc-coupon"><?= $escaper->escapeHtml(__('Coupon Code')) ?></label>
+                            <div class="bf-osc__inline">
+                                <input class="bf-osc__input" type="text" id="bf-osc-coupon" maxlength="255" autocomplete="off"
+                                       data-osc="coupon-input" aria-describedby="bf-osc-coupon-error"/>
+                                <button type="button" class="bf-osc__button bf-osc__button--secondary" data-osc="coupon-apply" @click="applyCoupon"><?= $escaper->escapeHtml(__('Apply')) ?></button>
+                            </div>
+                        </div>
+                        <div class="bf-osc__coupon-applied" data-osc="coupon-applied" x-show="hasCoupon" x-cloak>
+                            <span><?= $escaper->escapeHtml(__('Coupon applied:')) ?></span>
+                            <span x-text="couponCode"></span>
+                            <button type="button" class="bf-osc__link" data-osc="coupon-remove" @click="removeCoupon"><?= $escaper->escapeHtml(__('Remove')) ?></button>
+                        </div>
+                        <div class="bf-osc__field-error" id="bf-osc-coupon-error" data-osc-error="coupon" role="alert"></div>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($viewModel->showGiftMessage()): ?>
+                    <fieldset class="bf-osc__gift" data-osc="gift">
+                        <legend class="bf-osc__subtitle"><?= $escaper->escapeHtml(__('Gift Message (optional)')) ?></legend>
+                        <div class="bf-osc__field bf-osc__field--half">
+                            <label class="bf-osc__label" for="bf-osc-gift-sender"><?= $escaper->escapeHtml(__('From')) ?></label>
+                            <input class="bf-osc__input" type="text" id="bf-osc-gift-sender" maxlength="255" data-osc-gift="sender"/>
+                        </div>
+                        <div class="bf-osc__field bf-osc__field--half">
+                            <label class="bf-osc__label" for="bf-osc-gift-recipient"><?= $escaper->escapeHtml(__('To')) ?></label>
+                            <input class="bf-osc__input" type="text" id="bf-osc-gift-recipient" maxlength="255" data-osc-gift="recipient"/>
+                        </div>
+                        <div class="bf-osc__field bf-osc__field--full">
+                            <label class="bf-osc__label" for="bf-osc-gift-message"><?= $escaper->escapeHtml(__('Message')) ?></label>
+                            <textarea class="bf-osc__input" id="bf-osc-gift-message" rows="3" maxlength="1000" data-osc-gift="message"></textarea>
+                        </div>
+                    </fieldset>
+                <?php endif; ?>
+
+                <?php if ($viewModel->showNewsletter()): ?>
+                    <label class="bf-osc__check">
+                        <input type="checkbox" data-osc="newsletter"/>
+                        <span><?= $escaper->escapeHtml(__('Subscribe to our newsletter')) ?></span>
+                    </label>
+                <?php endif; ?>
+
+                <div class="bf-osc__agreements" data-osc="agreements">
+                    <template x-for="agreement in agreements" :key="agreement.agreementId">
+                        <div>
+                            <div class="bf-osc__agreement-content" :data-osc-agreement-html="agreementContentRef"></div>
+                            <label class="bf-osc__check" x-show="agreementIsManual">
+                                <input type="checkbox" :data-osc-agreement="agreement.agreementId" aria-required="true"/>
+                                <span :data-osc-agreement-html="agreementLabelRef"></span>
+                            </label>
+                            <div class="bf-osc__field-error" :data-osc-error="agreementErrorKey" role="alert"></div>
+                        </div>
+                    </template>
+                </div>
+
+                <button type="button" class="bf-osc__button bf-osc__button--primary" data-osc="place-order" :disabled="placeDisabled" @click="placeOrder">
+                    <span x-show="notPlacing"><?= $escaper->escapeHtml(__('Place Order')) ?></span>
+                    <span x-show="placing" x-cloak><?= $escaper->escapeHtml(__('Placing order...')) ?></span>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <?php if ($viewModel->showOrderSummary()): ?>
+        <aside class="bf-osc__summary" aria-label="<?= $escaper->escapeHtmlAttr(__('Order Summary')) ?>">
+            <h2 class="bf-osc__section-title bf-osc__summary-title"><?= $escaper->escapeHtml(__('Order Summary')) ?></h2>
+            <ul class="bf-osc__items" data-osc="summary-items">
+                <template x-for="item in summaryItems" :key="item.id">
+                    <li class="bf-osc__item">
+                        <span>
+                            <span x-text="item.name"></span>
+                            <span class="bf-osc__item-qty" x-text="item.qty"></span>
+                        </span>
+                        <span x-text="item.total"></span>
+                    </li>
+                </template>
+            </ul>
+            <dl class="bf-osc__totals" data-osc="summary-totals">
+                <template x-for="total in totalRows" :key="total.code">
+                    <div class="bf-osc__total-row">
+                        <dt :class="totalClass" x-text="total.title"></dt>
+                        <dd :class="totalClass" :data-osc-total="total.code" x-text="total.value"></dd>
+                    </div>
+                </template>
+            </dl>
+            <p class="bf-osc__note"><a href="<?= $escaper->escapeUrl($viewModel->getCartUrl()) ?>"><?= $escaper->escapeHtml(__('Edit cart')) ?></a></p>
+        </aside>
+    <?php endif; ?>
+</div>

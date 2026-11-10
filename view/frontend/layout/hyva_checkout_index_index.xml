@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2026 Blue Fairy Development. All rights reserved.
+ *
+ * On Hyvä themes, swap the Luma checkout template (RequireJS) for the Alpine.js one.
+ * The base module's handle bluefairy_osc_checkout has already replaced the standard
+ * checkout root and added the stylesheet; its address forms and view model are reused.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="bluefairy.osc.root" template="BlueFairy_OneStepCheckoutHyva::checkout/osc-root.phtml"/>
+    </body>
+</page>

@@ -1,0 +1,11 @@
+# What a merchant does NOT receive.
+#
+# This file has to live INSIDE the package directory, not only at the repository
+# root: `git archive` reads .gitattributes from within the tree it is archiving.
+Test/ export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+phpunit.xml.dist export-ignore
+phpstan.neon.dist export-ignore
+phpcs.xml.dist export-ignore
+.githooks/ export-ignore
