@@ -14,6 +14,10 @@ Hyvä themes.
 
 ## Install
 
+This package comes from the same Private Packagist repository as the base package
+`bluefairy/module-one-step-checkout`. Configure the repository and your credentials first, as
+the base package's README describes, then:
+
 ```bash
 composer require bluefairy/module-one-step-checkout-hyva
 bin/magento module:enable BlueFairy_OneStepCheckoutHyva
