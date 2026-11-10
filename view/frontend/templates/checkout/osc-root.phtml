@@ -131,12 +131,15 @@ $accordion = $viewModel->isAccordionMode();
                             <input type="radio" name="bf-osc-payment-method" :value="row.code" :checked="row.selected"/>
                             <span class="bf-osc__option-title" x-text="row.title"></span>
                             <span class="bf-osc__option-extra" x-show="rowHasInfo" x-text="row.info"></span>
-                            <span class="bf-osc__option-extra" x-show="rowNeedsPoNumber">
-                                <label class="bf-osc__label" for="bf-osc-po-number"><?= $escaper->escapeHtml(__('Purchase Order Number')) ?></label>
-                                <input class="bf-osc__input" type="text" id="bf-osc-po-number" maxlength="32" autocomplete="off"
-                                       data-osc="po-number" aria-required="true"/>
-                                <span class="bf-osc__field-error" data-osc-error="poNumber" role="alert"></span>
-                            </span>
+                            <?php /* x-if, not x-show: the field has an id, and it must exist once, on the selected row only. */ ?>
+                            <template x-if="rowNeedsPoNumber">
+                                <span class="bf-osc__option-extra">
+                                    <label class="bf-osc__label" for="bf-osc-po-number"><?= $escaper->escapeHtml(__('Purchase Order Number')) ?></label>
+                                    <input class="bf-osc__input" type="text" id="bf-osc-po-number" maxlength="32" autocomplete="off"
+                                           data-osc="po-number" aria-required="true"/>
+                                    <span class="bf-osc__field-error" data-osc-error="poNumber" role="alert"></span>
+                                </span>
+                            </template>
                         </label>
                     </template>
                 </div>

@@ -290,8 +290,21 @@
                 }
                 this.drawRegion('shipping');
                 this.drawRegion('billing');
+                this.syncPoNumber();
                 this.drawErrors();
                 this.drawAgreementTexts();
+            },
+
+            /**
+             * The purchase order field exists only while that method is selected, so it is created
+             * empty each time: give it back what the shopper typed, unless they are typing in it now.
+             */
+            syncPoNumber: function () {
+                var input = this.$root.querySelector('[data-osc="po-number"]');
+
+                if (input && document.activeElement !== input && input.value !== this.checkout.state.poNumber) {
+                    input.value = this.checkout.state.poNumber;
+                }
             },
 
             setValue: function (selector, value) {
