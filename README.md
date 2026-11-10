@@ -46,6 +46,16 @@ As in the base module: Check / Money Order, Bank Transfer Payment, Cash On Deliv
 and Zero Subtotal Checkout are built in; any other method needs a payment renderer registered in
 `window.bluefairyOscPayments` before the checkout starts.
 
+## Uninstall
+
+This package stores nothing of its own. Remove it on its own:
+
+```bash
+bin/magento module:uninstall BlueFairy_OneStepCheckoutHyva
+```
+
+or together with the base, as the base package's README describes.
+
 ## Support
 
 support@bluefairydevelopment.com
