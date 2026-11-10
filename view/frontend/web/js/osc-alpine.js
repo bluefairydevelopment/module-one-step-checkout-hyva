@@ -21,6 +21,8 @@
             version: 0,
             checkout: null,
             synced: false,
+            hadGlobal: false,
+            memoised: null,
 
             init: function () {
                 var self = this,
@@ -104,7 +106,22 @@
             get saveAddressShown() { return !this.state().isVirtual && !this.state().shipping.customer_address_id; },
 
             // ---- shipping methods ------------------------------------------------------------------
-            get shippingRows() { return this.version >= 0 ? this.checkout.shippingRows() : []; },
+            /**
+             * Row lists keep their identity while their content is unchanged: a keystroke bumps the
+             * version, and a new array each time would make Alpine redraw every row.
+             */
+            memo: function (name, build) {
+                var rows = build(),
+                    signature = JSON.stringify(rows);
+
+                this.memoised = this.memoised || {};
+                if (!this.memoised[name] || this.memoised[name].signature !== signature) {
+                    this.memoised[name] = {signature: signature, rows: rows};
+                }
+
+                return this.memoised[name].rows;
+            },
+            get shippingRows() { return this.version >= 0 ? this.memo('shipping', this.checkout.shippingRows) : []; },
             get hasShippingRows() { return this.shippingRows.length > 0; },
             get noShippingRows() { return this.shippingRows.length === 0; },
             get shippingEmptyText() {
@@ -118,7 +135,7 @@
             },
 
             // ---- payment methods -------------------------------------------------------------------
-            get paymentRows() { return this.version >= 0 ? this.checkout.paymentRows() : []; },
+            get paymentRows() { return this.version >= 0 ? this.memo('payment', this.checkout.paymentRows) : []; },
             get noPaymentRows() { return !this.state().loading && this.paymentRows.length === 0; },
             rowHasInfo: function () {
                 return this.row.selected && !this.row.isPurchaseOrder && this.row.info !== '';
@@ -144,11 +161,14 @@
             agreementLabelRef: function () {
                 return 'label:' + this.agreement.agreementId;
             },
+            agreementNoticeRef: function () {
+                return 'label:' + this.agreement.agreementId + ':notice';
+            },
             agreementErrorKey: function () {
                 return 'agreement.' + this.agreement.agreementId;
             },
-            get summaryItems() { return this.version >= 0 ? this.checkout.summaryItems() : []; },
-            get totalRows() { return this.version >= 0 ? this.checkout.totalRows() : []; },
+            get summaryItems() { return this.version >= 0 ? this.memo('items', this.checkout.summaryItems) : []; },
+            get totalRows() { return this.version >= 0 ? this.memo('totals', this.checkout.totalRows) : []; },
             totalClass: function () {
                 return this.total.grand ? 'bf-osc__grand' : '';
             },
@@ -280,7 +300,22 @@
             // shared with the Luma view; they are addressed by data attribute, not by Alpine bindings.
 
             afterChange: function () {
-                var state = this.checkout.state;
+                var state = this.checkout.state,
+                    global = this.$root.querySelector('[data-osc="global-error"]'),
+                    active = document.activeElement;
+
+                if (!state.loading) {
+                    // The page arrives marked as loading; Alpine's class binding only adds to it.
+                    this.$root.classList.remove('bf-osc--loading');
+                }
+                // Take the keyboard to a new message only when it is not in use, as the Luma view does.
+                if (state.errors._global && !this.hadGlobal && global
+                    && (!active || active === document.body || active.getAttribute('data-osc') === 'place-order')) {
+                    this.$nextTick(function () {
+                        global.focus();
+                    });
+                }
+                this.hadGlobal = !!state.errors._global;
 
                 if (!state.loading && !this.synced) {
                     this.synced = true;
@@ -413,7 +448,7 @@
             /**
              * Terms and conditions. The server prepares both texts as HTML exactly as Magento's own
              * checkout does (the merchant's markup for an HTML agreement, escaped text otherwise); the
-             * Alpine CSP build has no x-html, so they are set here. Nothing else is written as markup.
+             * markup is set here from the data, once, and nothing else is written as markup.
              */
             drawAgreementTexts: function () {
                 var agreements = this.checkout.state.agreements;

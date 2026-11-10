@@ -19,6 +19,9 @@ class PackageTest extends TestCase
 {
     private const ROOT = __DIR__ . '/../../..';
 
+    /** The base module, checked out beside this one (locally) or installed beside it (vendor/bluefairy). */
+    private const BASE = __DIR__ . '/../../../../module-one-step-checkout';
+
     private function template(): string
     {
         return (string) file_get_contents(self::ROOT . '/view/frontend/templates/checkout/osc-root.phtml');
@@ -185,5 +188,24 @@ class PackageTest extends TestCase
         }
         self::assertGreaterThan(6, $count, 'the scan must have examined the shipped files');
         self::assertSame([], $hits);
+    }
+
+    public function testEveryCoreFunctionTheComponentCallsExistsInTheBaseModule(): void
+    {
+        // A rename in the base module's core would otherwise break this view without a sound.
+        $core = (string) file_get_contents(self::BASE . '/view/frontend/web/js/osc-core.js');
+        preg_match_all('/this\.checkout\.([A-Za-z]+)\b/', $this->script(), $calls);
+        $called = array_values(array_diff(array_unique($calls[1]), ['state', 'config']));
+        self::assertGreaterThan(15, count($called), 'the scan must have found the calls');
+        foreach ($called as $name) {
+            self::assertMatchesRegularExpression('/^\s+' . $name . ':/m', $core, 'osc-core.js offers ' . $name);
+        }
+    }
+
+    public function testAnAutomaticAgreementShowsItsNoticeAndAManualOneItsCheckbox(): void
+    {
+        $template = $this->template();
+        self::assertStringContainsString('x-show="agreementIsManual"', $template);
+        self::assertStringContainsString('x-show="agreementIsAutomatic" :data-osc-agreement-html="agreementNoticeRef"', $template);
     }
 }

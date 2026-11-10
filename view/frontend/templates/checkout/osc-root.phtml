@@ -23,7 +23,7 @@ $accordion = $viewModel->isAccordionMode();
 ?>
 <script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_OneStepCheckout::js/osc-core.js')) ?>"></script>
 <script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_OneStepCheckoutHyva::js/osc-alpine.js')) ?>"></script>
-<div id="bf-osc" class="bf-osc<?= $viewModel->isAccordionMode() ? ' bf-osc--accordion' : '' ?>"
+<div id="bf-osc" class="bf-osc bf-osc--loading<?= $viewModel->isAccordionMode() ? ' bf-osc--accordion' : '' ?>"
      x-data="bfOscCheckout" :class="rootClass"
      @input="onInput" @change="onChange" @focusin="onFocusIn"
      data-bf-osc-config="<?= $escaper->escapeHtmlAttr($viewModel->getJsonConfig()) ?>">
@@ -219,12 +219,14 @@ $accordion = $viewModel->isAccordionMode();
                                 <input type="checkbox" :data-osc-agreement="agreement.agreementId" aria-required="true"/>
                                 <span :data-osc-agreement-html="agreementLabelRef"></span>
                             </label>
+                            <?php /* An automatic agreement has no checkbox; its text is the notice the shopper reads. */ ?>
+                            <span class="bf-osc__note" x-show="agreementIsAutomatic" :data-osc-agreement-html="agreementNoticeRef"></span>
                             <div class="bf-osc__field-error" :data-osc-error="agreementErrorKey" role="alert"></div>
                         </div>
                     </template>
                 </div>
 
-                <button type="button" class="bf-osc__button bf-osc__button--primary" data-osc="place-order" :disabled="placeDisabled" @click="placeOrder">
+                <button type="button" class="bf-osc__button bf-osc__button--primary" data-osc="place-order" disabled :disabled="placeDisabled" @click="placeOrder">
                     <span x-show="notPlacing"><?= $escaper->escapeHtml(__('Place Order')) ?></span>
                     <span x-show="placing" x-cloak><?= $escaper->escapeHtml(__('Placing order...')) ?></span>
                 </button>
