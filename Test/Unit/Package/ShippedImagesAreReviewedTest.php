@@ -30,7 +30,7 @@ class ShippedImagesAreReviewedTest extends TestCase
     private static function reviewed(): array
     {
         $path = self::packageRoot() . '/docs/images/REVIEWED.md';
-        $text = @file_get_contents($path);
+        $text = is_file($path) ? file_get_contents($path) : false;
         if ($text === false || trim($text) === '') {
             throw new RuntimeException("the review record is missing or empty at {$path}. Every "
                 . 'assertion below would pass over an empty expectation set, which is exactly '
