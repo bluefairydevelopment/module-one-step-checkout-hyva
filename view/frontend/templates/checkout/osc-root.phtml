@@ -22,6 +22,7 @@ $isLoggedIn = $viewModel->isLoggedIn();
 $accordion = $viewModel->isAccordionMode();
 ?>
 <script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_OneStepCheckout::js/osc-core.js')) ?>"></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_OneStepCheckout::js/osc-stripe.js')) ?>"></script>
 <script src="<?= $escaper->escapeUrl($block->getViewFileUrl('BlueFairy_OneStepCheckoutHyva::js/osc-alpine.js')) ?>"></script>
 <div id="bf-osc" class="bf-osc bf-osc--loading<?= $viewModel->isAccordionMode() ? ' bf-osc--accordion' : '' ?>"
      x-data="bfOscCheckout" :class="rootClass"
@@ -143,6 +144,8 @@ $accordion = $viewModel->isAccordionMode();
                         </label>
                     </template>
                 </div>
+                <?php /* Card fields (Stripe's Payment Element) live here, outside the redrawn list; Alpine never touches them. */ ?>
+                <div class="bf-osc__payment-hosts" data-osc="payment-hosts" x-ignore></div>
                 <div class="bf-osc__field-error" data-osc-error="paymentMethod" role="alert"></div>
                 <div class="bf-osc__billing" data-osc="billing">
                     <label class="bf-osc__check" data-osc="billing-same-field" x-show="billingSameShown">
