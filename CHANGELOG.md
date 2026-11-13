@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- What a shopper types before Alpine starts the checkout is no longer wiped when the cart first loads (M2MAP-904), seen on a Hyvä CSP child theme whose Alpine starts seconds after the page shows.
+- What a shopper types before Alpine starts the checkout is no longer wiped when the cart first loads (M2MAP-904), seen on a Hyvä CSP child theme whose Alpine starts seconds after the page shows. A field emptied before then stays empty. A signed-in customer's saved address is kept as it is, rather than merged into a new one (base 1.0.2).
 
 ### Changed
 
