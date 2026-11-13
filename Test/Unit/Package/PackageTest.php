@@ -137,7 +137,11 @@ class PackageTest extends TestCase
         self::assertCount(3, $scripts[0]);
         self::assertSame(['', '', ''], $scripts[1], 'no inline script: strict CSP would block it');
         self::assertStringContainsString("getViewFileUrl('BlueFairy_OneStepCheckout::js/osc-stripe.js')", $template);
-        self::assertLessThan(strpos($template, 'osc-alpine.js'), strpos($template, 'osc-stripe.js'), 'Stripe loads before the component');
+        self::assertLessThan(
+            strpos($template, "getViewFileUrl('BlueFairy_OneStepCheckoutHyva::js/osc-alpine.js')"),
+            strpos($template, "getViewFileUrl('BlueFairy_OneStepCheckout::js/osc-stripe.js')"),
+            'Stripe loads before the component'
+        );
         self::assertStringContainsString("getViewFileUrl('BlueFairy_OneStepCheckout::js/osc-core.js')", $template);
         self::assertStringContainsString("getViewFileUrl('BlueFairy_OneStepCheckoutHyva::js/osc-alpine.js')", $template);
         self::assertLessThan(strpos($template, 'osc-alpine.js'), strpos($template, 'osc-core.js'), 'the core loads first');
