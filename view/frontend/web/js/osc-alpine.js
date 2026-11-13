@@ -325,8 +325,8 @@
 
                 if (!state.loading && !this.synced) {
                     this.synced = true;
-                    // Typed before Alpine started this component (a theme that starts Alpine late,
-                    // M2MAP-904): keep it, or the copy below would wipe it.
+                    // Typed before Alpine started this component (a theme that starts Alpine late):
+                    // keep it, or the copy below would wipe it.
                     this.checkout.keepTyped(window.BlueFairyOscCore.typedInputs(this.$root));
                     this.syncInputs('shipping');
                     this.syncInputs('billing');
