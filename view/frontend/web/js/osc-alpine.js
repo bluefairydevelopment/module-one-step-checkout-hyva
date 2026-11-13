@@ -30,6 +30,10 @@
                     renderers = window.bluefairyOscPayments || {};
 
                 this.checkout = window.BlueFairyOscCore.createCheckout(config);
+                // Stripe's Payment Element, unless an integration of the store's own handles that method.
+                if (config.stripe && window.BlueFairyOscStripe && !renderers[config.stripe.code]) {
+                    this.checkout.registerPaymentRenderer(config.stripe.code, window.BlueFairyOscStripe.createRenderer(config.stripe));
+                }
                 Object.keys(renderers).forEach(function (code) {
                     self.checkout.registerPaymentRenderer(code, renderers[code]);
                 });
@@ -308,6 +312,8 @@
                     // The page arrives marked as loading; Alpine's class binding only adds to it.
                     this.$root.classList.remove('bf-osc--loading');
                 }
+                // Card fields live in hosts outside the redrawn list, so a redraw never wipes them.
+                this.checkout.mountPaymentHosts(this.$root.querySelector('[data-osc="payment-hosts"]'));
                 // Take the keyboard to a new message only when it is not in use, as the Luma view does.
                 if (state.errors._global && !this.hadGlobal && global
                     && (!active || active === document.body || active.getAttribute('data-osc') === 'place-order')) {
