@@ -46,9 +46,16 @@ component, so it runs under the Alpine CSP build Hyvä uses in strict mode.
 
 ## Payment methods
 
-As in the base module: Check / Money Order, Bank Transfer Payment, Cash On Delivery, Purchase Order
-and Zero Subtotal Checkout are built in; any other method needs a payment renderer registered in
-`window.bluefairyOscPayments` before the checkout starts.
+As in the base module (see its README, "Payment methods"): Check / Money Order, Bank Transfer
+Payment, Cash On Delivery, Purchase Order and Zero Subtotal Checkout are built in; Stripe's Payment
+Element is shown when the Stripe module (StripeIntegration_Payments 4.6) is installed and enabled;
+third-party methods that need nothing typed are offered once listed under **Other Payment Methods**;
+any other method needs a payment renderer registered in `window.bluefairyOscPayments` before the
+checkout starts.
+
+The Stripe card form lives in its own element, outside the part of the page Alpine redraws
+(`x-ignore`), so the card typed stays put. Stripe.js comes from `js.stripe.com`, which the Stripe
+module's CSP whitelist allows, so the form also works under the strict policy.
 
 ## Uninstall
 

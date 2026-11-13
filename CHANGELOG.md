@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.1 — Unreleased
+
+### Added
+
+- Stripe's Payment Element in the Hyvä checkout, from `bluefairy/module-one-step-checkout` 1.0.1: the card form sits in its own element that Alpine never redraws, so the card typed stays put. Works under Hyvä's strict Content Security Policy.
+
+### Changed
+
+- Requires `bluefairy/module-one-step-checkout` ^1.0.1.
+
 ## 1.0.0 — 2026-11-10
 
 ### Added
