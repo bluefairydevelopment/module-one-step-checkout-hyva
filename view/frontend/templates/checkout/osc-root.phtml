@@ -49,9 +49,33 @@ $accordion = $viewModel->isAccordionMode();
                     <div class="bf-osc__field bf-osc__field--full">
                         <label class="bf-osc__label" for="bf-osc-email"><?= $escaper->escapeHtml(__('Email Address')) ?></label>
                         <input class="bf-osc__input" type="email" id="bf-osc-email" name="email" maxlength="254"
-                               autocomplete="email" data-osc="email" aria-required="true" aria-describedby="bf-osc-email-error"/>
+                               autocomplete="email" data-osc="email" aria-required="true" aria-describedby="bf-osc-email-error" @blur="checkAccount"/>
                         <div class="bf-osc__field-error" id="bf-osc-email-error" data-osc-error="email" role="alert"></div>
                     </div>
+                    <?php $account = $viewModel->getAccountConfig(false, ''); ?>
+                    <?php if ($account['lookup']): ?>
+                        <div class="bf-osc__field bf-osc__field--full bf-osc__account" data-osc="account" x-show="accountShown" x-cloak>
+                            <p class="bf-osc__note" id="bf-osc-account-note" role="status">
+                                <?= $escaper->escapeHtml(__('You already have an account with us. Sign in, or continue as a guest.')) ?>
+                            </p>
+                            <?php if ($account['inline']): ?>
+                                <label class="bf-osc__label" for="bf-osc-account-password"><?= $escaper->escapeHtml(__('Password')) ?></label>
+                                <input class="bf-osc__input" type="password" id="bf-osc-account-password" autocomplete="current-password"
+                                       data-osc="account-password" aria-describedby="bf-osc-account-note bf-osc-account-error"
+                                       @keydown.enter.prevent="signIn"/>
+                                <div class="bf-osc__field-error" id="bf-osc-account-error" data-osc-error="account" role="alert"></div>
+                                <p class="bf-osc__note">
+                                    <button type="button" class="bf-osc__button" data-osc="account-sign-in"
+                                            :disabled="accountSigningIn" @click="signIn"><?= $escaper->escapeHtml(__('Sign In')) ?></button>
+                                    <a href="<?= $escaper->escapeUrl($account['forgotUrl']) ?>"><?= $escaper->escapeHtml(__('Forgot Your Password?')) ?></a>
+                                </p>
+                            <?php else: ?>
+                                <p class="bf-osc__note">
+                                    <a href="<?= $escaper->escapeUrl($account['loginPageUrl']) ?>"><?= $escaper->escapeHtml(__('Sign in')) ?></a>
+                                </p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
                     <p class="bf-osc__note">
                         <?= $escaper->escapeHtml(__('Already have an account?')) ?>
                         <a href="<?= $escaper->escapeUrl($viewModel->getLoginUrl()) ?>"><?= $escaper->escapeHtml(__('Sign in')) ?></a>

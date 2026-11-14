@@ -44,6 +44,14 @@ view on a Hyvä theme gets this checkout and a Luma store view gets the base mod
 The template has no inline script, and every Alpine attribute names a property or a method of the
 component, so it runs under the Alpine CSP build Hyvä uses in strict mode.
 
+## Signing in a guest whose email has an account
+
+As in the base module: when Magento's **Sales > Checkout > Checkout Options > Enable Guest Checkout
+Login** is Yes and a guest types an email that has an account, the contact step offers a password
+field and **Sign In**; the page reloads as the customer, and guest checkout stays open. With the
+setting No (Magento's default) only the "Already have an account? Sign in" link is shown. See the
+base module's README for the details.
+
 ## Payment methods
 
 As in the base module (see its README, "Payment methods"): Check / Money Order, Bank Transfer

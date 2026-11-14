@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.3 — Unreleased
+
+### Fixed
+
+- A guest who types an email that already has an account is offered a sign-in on the page (password, **Sign In**, **Forgot Your Password?**), following Magento's **Enable Guest Checkout Login** setting; guest checkout stays open (M2MAP-906, base 1.0.3). Works under Hyvä's strict Content Security Policy.
+
+- Stripe: card entry is always on screen for a shopper whom Stripe Link already knows; Link is offered only when the base module's new **Offer Stripe Link in the Card Form** is Yes (M2MAP-906, base 1.0.3).
+
+### Changed
+
+- Requires `bluefairy/module-one-step-checkout` ^1.0.3.
+
 ## 1.0.2 — 2026-11-13
 
 ### Fixed
