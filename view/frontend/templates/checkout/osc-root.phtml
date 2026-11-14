@@ -68,6 +68,7 @@ $accordion = $viewModel->isAccordionMode();
                                     <button type="button" class="bf-osc__button" data-osc="account-sign-in"
                                             :disabled="accountSigningIn" @click="signIn"><?= $escaper->escapeHtml(__('Sign In')) ?></button>
                                     <a href="<?= $escaper->escapeUrl($account['forgotUrl']) ?>"><?= $escaper->escapeHtml(__('Forgot Your Password?')) ?></a>
+                                    <a href="<?= $escaper->escapeUrl($account['loginPageUrl']) ?>"><?= $escaper->escapeHtml(__('Sign in on the sign-in page')) ?></a>
                                 </p>
                             <?php else: ?>
                                 <p class="bf-osc__note">
