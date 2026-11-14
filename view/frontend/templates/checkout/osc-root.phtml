@@ -49,7 +49,7 @@ $accordion = $viewModel->isAccordionMode();
                     <div class="bf-osc__field bf-osc__field--full">
                         <label class="bf-osc__label" for="bf-osc-email"><?= $escaper->escapeHtml(__('Email Address')) ?></label>
                         <input class="bf-osc__input" type="email" id="bf-osc-email" name="email" maxlength="254"
-                               autocomplete="email" data-osc="email" aria-required="true" aria-describedby="bf-osc-email-error" @blur="checkAccount"/>
+                               autocomplete="email" data-osc="email" aria-required="true" aria-describedby="bf-osc-email-error" @blur="checkAccount" @change="checkAccount"/>
                         <div class="bf-osc__field-error" id="bf-osc-email-error" data-osc-error="email" role="alert"></div>
                     </div>
                     <?php $account = $viewModel->getAccountConfig(false, ''); ?>
