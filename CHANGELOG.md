@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Stripe: card entry is always on screen for a shopper whom Stripe Link already knows; Link is offered only when the base module's new **Offer Stripe Link in the Card Form** is Yes (M2MAP-906, base 1.0.3).
 
+- The email is looked up when the browser fills it in (change), as well as when the shopper leaves the field.
+
 ### Changed
 
 - Requires `bluefairy/module-one-step-checkout` ^1.0.3.
