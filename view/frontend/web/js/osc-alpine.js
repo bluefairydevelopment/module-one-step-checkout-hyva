@@ -70,18 +70,42 @@
             sectionShown: function (key) {
                 return this.version >= 0 && this.checkout.sections().indexOf(key) !== -1;
             },
-            get contactOpen() { return this.sectionOpen('contact'); },
-            get shippingOpen() { return this.sectionOpen('shipping'); },
-            get shippingMethodOpen() { return this.sectionOpen('shipping-method'); },
-            get paymentOpen() { return this.sectionOpen('payment'); },
-            get reviewOpen() { return this.sectionOpen('review'); },
-            get contactExpanded() { return String(this.contactOpen); },
-            get shippingExpanded() { return String(this.shippingOpen); },
-            get shippingMethodExpanded() { return String(this.shippingMethodOpen); },
-            get paymentExpanded() { return String(this.paymentOpen); },
-            get reviewExpanded() { return String(this.reviewOpen); },
-            get shippingShown() { return this.sectionShown('shipping'); },
-            get shippingMethodShown() { return this.sectionShown('shipping-method'); },
+            get contactOpen() {
+                return this.sectionOpen('contact');
+            },
+            get shippingOpen() {
+                return this.sectionOpen('shipping');
+            },
+            get shippingMethodOpen() {
+                return this.sectionOpen('shipping-method');
+            },
+            get paymentOpen() {
+                return this.sectionOpen('payment');
+            },
+            get reviewOpen() {
+                return this.sectionOpen('review');
+            },
+            get contactExpanded() {
+                return String(this.contactOpen);
+            },
+            get shippingExpanded() {
+                return String(this.shippingOpen);
+            },
+            get shippingMethodExpanded() {
+                return String(this.shippingMethodOpen);
+            },
+            get paymentExpanded() {
+                return String(this.paymentOpen);
+            },
+            get reviewExpanded() {
+                return String(this.reviewOpen);
+            },
+            get shippingShown() {
+                return this.sectionShown('shipping');
+            },
+            get shippingMethodShown() {
+                return this.sectionShown('shipping-method');
+            },
 
             toggleSection: function (event) {
                 var key = event.currentTarget.getAttribute('data-osc-toggle');
@@ -101,23 +125,51 @@
             },
 
             // ---- page state ------------------------------------------------------------------------
-            get loading() { return this.state().loading; },
-            get rootClass() { return this.state().loading ? 'bf-osc--loading' : ''; },
-            get globalError() { return this.state().errors._global || ''; },
-            get hasGlobalError() { return !!this.state().errors._global; },
-            get placeDisabled() { return this.state().loading || this.state().placing; },
-            get placing() { return this.state().placing; },
-            get notPlacing() { return !this.state().placing; },
+            get loading() {
+                return this.state().loading;
+            },
+            get rootClass() {
+                return this.state().loading ? 'bf-osc--loading' : '';
+            },
+            get globalError() {
+                return this.state().errors._global || '';
+            },
+            get hasGlobalError() {
+                return !!this.state().errors._global;
+            },
+            get placeDisabled() {
+                return this.state().loading || this.state().placing;
+            },
+            get placing() {
+                return this.state().placing;
+            },
+            get notPlacing() {
+                return !this.state().placing;
+            },
 
             // ---- address ---------------------------------------------------------------------------
-            get addressBookRows() { return this.version >= 0 ? this.checkout.addressBookRows() : []; },
-            get hasAddressBook() { return this.addressBookRows.length > 0; },
-            get billingSame() { return this.state().billingSame; },
-            get billingSameShown() { return !this.state().isVirtual; },
-            get billingFormShown() { return this.state().isVirtual || !this.state().billingSame; },
+            get addressBookRows() {
+                return this.version >= 0 ? this.checkout.addressBookRows() : [];
+            },
+            get hasAddressBook() {
+                return this.addressBookRows.length > 0;
+            },
+            get billingSame() {
+                return this.state().billingSame;
+            },
+            get billingSameShown() {
+                return !this.state().isVirtual;
+            },
+            get billingFormShown() {
+                return this.state().isVirtual || !this.state().billingSame;
+            },
             // ---- account: a guest's email that has an account is offered a sign-in -------
-            get accountShown() { return this.version >= 0 && !!this.state().account.exists; },
-            get accountSigningIn() { return this.version >= 0 && !!this.state().account.signingIn; },
+            get accountShown() {
+                return this.version >= 0 && !!this.state().account.exists;
+            },
+            get accountSigningIn() {
+                return this.version >= 0 && !!this.state().account.signingIn;
+            },
             checkAccount: function () {
                 this.checkout.checkAccount();
             },
@@ -135,9 +187,13 @@
                     }
                 });
             },
-            get saveInAddressBook() { return this.state().saveInAddressBook; },
+            get saveInAddressBook() {
+                return this.state().saveInAddressBook;
+            },
             // Offered for an address typed here; a saved one is in the book already.
-            get saveAddressShown() { return !this.state().isVirtual && !this.state().shipping.customer_address_id; },
+            get saveAddressShown() {
+                return !this.state().isVirtual && !this.state().shipping.customer_address_id;
+            },
 
             // ---- shipping methods ------------------------------------------------------------------
             /**
@@ -150,14 +206,20 @@
 
                 this.memoised = this.memoised || {};
                 if (!this.memoised[name] || this.memoised[name].signature !== signature) {
-                    this.memoised[name] = {signature: signature, rows: rows};
+                    this.memoised[name] = { signature: signature, rows: rows };
                 }
 
                 return this.memoised[name].rows;
             },
-            get shippingRows() { return this.version >= 0 ? this.memo('shipping', this.checkout.shippingRows) : []; },
-            get hasShippingRows() { return this.shippingRows.length > 0; },
-            get noShippingRows() { return this.shippingRows.length === 0; },
+            get shippingRows() {
+                return this.version >= 0 ? this.memo('shipping', this.checkout.shippingRows) : [];
+            },
+            get hasShippingRows() {
+                return this.shippingRows.length > 0;
+            },
+            get noShippingRows() {
+                return this.shippingRows.length === 0;
+            },
             get shippingEmptyText() {
                 var state = this.state();
 
@@ -169,8 +231,12 @@
             },
 
             // ---- payment methods -------------------------------------------------------------------
-            get paymentRows() { return this.version >= 0 ? this.memo('payment', this.checkout.paymentRows) : []; },
-            get noPaymentRows() { return !this.state().loading && this.paymentRows.length === 0; },
+            get paymentRows() {
+                return this.version >= 0 ? this.memo('payment', this.checkout.paymentRows) : [];
+            },
+            get noPaymentRows() {
+                return !this.state().loading && this.paymentRows.length === 0;
+            },
             rowHasInfo: function () {
                 return this.row.selected && !this.row.isPurchaseOrder && this.row.info !== '';
             },
@@ -179,10 +245,18 @@
             },
 
             // ---- coupon, agreements, summary -------------------------------------------------------
-            get couponCode() { return this.state().couponCode || ''; },
-            get hasCoupon() { return !!this.state().couponCode; },
-            get noCoupon() { return !this.state().couponCode; },
-            get agreements() { return this.state().agreements; },
+            get couponCode() {
+                return this.state().couponCode || '';
+            },
+            get hasCoupon() {
+                return !!this.state().couponCode;
+            },
+            get noCoupon() {
+                return !this.state().couponCode;
+            },
+            get agreements() {
+                return this.state().agreements;
+            },
             agreementIsManual: function () {
                 return this.agreement.mode === 1;
             },
@@ -201,8 +275,12 @@
             agreementErrorKey: function () {
                 return 'agreement.' + this.agreement.agreementId;
             },
-            get summaryItems() { return this.version >= 0 ? this.memo('items', this.checkout.summaryItems) : []; },
-            get totalRows() { return this.version >= 0 ? this.memo('totals', this.checkout.totalRows) : []; },
+            get summaryItems() {
+                return this.version >= 0 ? this.memo('items', this.checkout.summaryItems) : [];
+            },
+            get totalRows() {
+                return this.version >= 0 ? this.memo('totals', this.checkout.totalRows) : [];
+            },
             totalClass: function () {
                 return this.total.grand ? 'bf-osc__grand' : '';
             },
@@ -327,8 +405,11 @@
              */
             leaveForSuccess: function () {
                 try {
-                    if (window.hyva && typeof window.hyva.getBrowserStorage === 'function'
-                        && window.hyva.getBrowserStorage()) {
+                    if (
+                        window.hyva &&
+                        typeof window.hyva.getBrowserStorage === 'function' &&
+                        window.hyva.getBrowserStorage()
+                    ) {
                         window.hyva.getBrowserStorage().removeItem('mage-cache-storage');
                     }
                 } catch (e) {
@@ -353,8 +434,12 @@
                 // Card fields live in hosts outside the redrawn list, so a redraw never wipes them.
                 this.checkout.mountPaymentHosts(this.$root.querySelector('[data-osc="payment-hosts"]'));
                 // Take the keyboard to a new message only when it is not in use, as the Luma view does.
-                if (state.errors._global && !this.hadGlobal && global
-                    && (!active || active === document.body || active.getAttribute('data-osc') === 'place-order')) {
+                if (
+                    state.errors._global &&
+                    !this.hadGlobal &&
+                    global &&
+                    (!active || active === document.body || active.getAttribute('data-osc') === 'place-order')
+                ) {
                     this.$nextTick(function () {
                         global.focus();
                     });
@@ -432,7 +517,7 @@
                     while (select.firstChild) {
                         select.removeChild(select.firstChild);
                     }
-                    [{id: '', name: this.checkout.t('region.select')}].concat(regions).forEach(function (region) {
+                    [{ id: '', name: this.checkout.t('region.select') }].concat(regions).forEach(function (region) {
                         var option = document.createElement('option');
 
                         option.value = region.id;
@@ -544,4 +629,4 @@
     document.addEventListener('alpine:init', function () {
         window.Alpine.data('bfOscCheckout', component);
     });
-}());
+})();
