@@ -29,7 +29,12 @@
                     config = JSON.parse(this.$root.getAttribute('data-bf-osc-config')),
                     renderers = window.bluefairyOscPayments || {};
 
-                this.checkout = window.BlueFairyOscCore.createCheckout(config);
+                this.checkout = window.BlueFairyOscCore.createCheckout(config, {
+                    // Hyvä checks the form key on Magento's sign-in route; Hyvä's own helper reads or sets it.
+                    formKey: function () {
+                        return window.hyva && typeof window.hyva.getFormKey === 'function' ? window.hyva.getFormKey() : '';
+                    }
+                });
                 // Stripe's Payment Element, unless an integration of the store's own handles that method.
                 if (config.stripe && window.BlueFairyOscStripe && !renderers[config.stripe.code]) {
                     this.checkout.registerPaymentRenderer(config.stripe.code, window.BlueFairyOscStripe.createRenderer(config.stripe));
