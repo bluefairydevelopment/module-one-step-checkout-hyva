@@ -29,7 +29,12 @@
                     config = JSON.parse(this.$root.getAttribute('data-bf-osc-config')),
                     renderers = window.bluefairyOscPayments || {};
 
-                this.checkout = window.BlueFairyOscCore.createCheckout(config);
+                this.checkout = window.BlueFairyOscCore.createCheckout(config, {
+                    // Hyvä checks the form key on Magento's sign-in route; Hyvä's own helper reads or sets it.
+                    formKey: function () {
+                        return window.hyva && typeof window.hyva.getFormKey === 'function' ? window.hyva.getFormKey() : '';
+                    }
+                });
                 // Stripe's Payment Element, unless an integration of the store's own handles that method.
                 if (config.stripe && window.BlueFairyOscStripe && !renderers[config.stripe.code]) {
                     this.checkout.registerPaymentRenderer(config.stripe.code, window.BlueFairyOscStripe.createRenderer(config.stripe));
@@ -105,6 +110,26 @@
             get billingSame() { return this.state().billingSame; },
             get billingSameShown() { return !this.state().isVirtual; },
             get billingFormShown() { return this.state().isVirtual || !this.state().billingSame; },
+            // ---- account: a guest's email that has an account is offered a sign-in -------
+            get accountShown() { return this.version >= 0 && !!this.state().account.exists; },
+            get accountSigningIn() { return this.version >= 0 && !!this.state().account.signingIn; },
+            checkAccount: function () {
+                this.checkout.checkAccount();
+            },
+            signIn: function () {
+                var root = this.$root;
+
+                this.checkout.signIn().then(function (signedIn) {
+                    var password = root.querySelector('[data-osc="account-password"]');
+
+                    if (signedIn) {
+                        // Magento has moved this cart into the customer's: show their checkout.
+                        window.location.reload();
+                    } else if (password) {
+                        password.focus();
+                    }
+                });
+            },
             get saveInAddressBook() { return this.state().saveInAddressBook; },
             // Offered for an address typed here; a saved one is in the book already.
             get saveAddressShown() { return !this.state().isVirtual && !this.state().shipping.customer_address_id; },
@@ -187,6 +212,8 @@
                     this.checkout.setAddressField(form.getAttribute('data-osc-address'), target.getAttribute('data-osc-input'), target.value);
                 } else if (kind === 'email') {
                     this.checkout.setEmail(target.value);
+                } else if (kind === 'account-password') {
+                    this.checkout.setAccountPassword(target.value);
                 } else if (kind === 'coupon-input') {
                     this.checkout.setCouponInput(target.value);
                 } else if (kind === 'po-number') {
@@ -336,6 +363,7 @@
                 this.drawRegion('billing');
                 this.syncPoNumber();
                 this.drawErrors();
+                this.drawAccount();
                 this.drawAgreementTexts();
             },
 
@@ -452,6 +480,27 @@
                         }
                     });
                 });
+            },
+
+            /** The sign-in offer's password and message, written directly as the Luma view does. */
+            drawAccount: function () {
+                var account = this.checkout.state.account,
+                    password = this.$root.querySelector('[data-osc="account-password"]'),
+                    error = this.$root.querySelector('[data-osc-error="account"]');
+
+                if (password && password.value !== account.password && document.activeElement !== password) {
+                    password.value = account.password;
+                }
+                if (password) {
+                    if (account.error) {
+                        password.setAttribute('aria-invalid', 'true');
+                    } else {
+                        password.removeAttribute('aria-invalid');
+                    }
+                }
+                if (error && error.textContent !== account.error) {
+                    error.textContent = account.error;
+                }
             },
 
             /**
