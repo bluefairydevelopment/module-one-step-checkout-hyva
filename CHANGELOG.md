@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stripe: card entry is always on screen for a shopper whom Stripe Link already knows; Link is offered only when the base module's new **Offer Stripe Link in the Card Form** is Yes (M2MAP-906, base 1.0.3).
 
 - The email is looked up when the browser fills it in (change), as well as when the shopper leaves the field.
+- The checkout page carries the states and provinces of the store's default country only; another country's list is fetched when the shopper chooses it, and the Hyvä view draws it when it arrives (base 1.0.3, M2MAP-880).
+- Which address fields ask for new shipping rates follows the base module's new **Shipping Rates > Ask for New Rates When These Change** (base 1.0.3, M2MAP-880).
 
 ### Changed
 
