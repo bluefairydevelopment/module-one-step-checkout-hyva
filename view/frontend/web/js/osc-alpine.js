@@ -32,12 +32,17 @@
                 this.checkout = window.BlueFairyOscCore.createCheckout(config, {
                     // Hyvä checks the form key on Magento's sign-in route; Hyvä's own helper reads or sets it.
                     formKey: function () {
-                        return window.hyva && typeof window.hyva.getFormKey === 'function' ? window.hyva.getFormKey() : '';
+                        return window.hyva && typeof window.hyva.getFormKey === 'function'
+                            ? window.hyva.getFormKey()
+                            : '';
                     }
                 });
                 // Stripe's Payment Element, unless an integration of the store's own handles that method.
                 if (config.stripe && window.BlueFairyOscStripe && !renderers[config.stripe.code]) {
-                    this.checkout.registerPaymentRenderer(config.stripe.code, window.BlueFairyOscStripe.createRenderer(config.stripe));
+                    this.checkout.registerPaymentRenderer(
+                        config.stripe.code,
+                        window.BlueFairyOscStripe.createRenderer(config.stripe)
+                    );
                 }
                 Object.keys(renderers).forEach(function (code) {
                     self.checkout.registerPaymentRenderer(code, renderers[code]);
@@ -209,7 +214,11 @@
                     form = target.closest('[data-osc-address]');
 
                 if (form && target.hasAttribute('data-osc-input')) {
-                    this.checkout.setAddressField(form.getAttribute('data-osc-address'), target.getAttribute('data-osc-input'), target.value);
+                    this.checkout.setAddressField(
+                        form.getAttribute('data-osc-address'),
+                        target.getAttribute('data-osc-input'),
+                        target.value
+                    );
                 } else if (kind === 'email') {
                     this.checkout.setEmail(target.value);
                 } else if (kind === 'account-password') {
@@ -296,7 +305,8 @@
                     }
                     self.$nextTick(function () {
                         // The first field in error that is on screen (a region has two controls, one hidden).
-                        var invalid = Array.prototype.filter.call(self.$root.querySelectorAll('[aria-invalid="true"]'), function (node) {
+                        var fields = self.$root.querySelectorAll('[aria-invalid="true"]'),
+                            invalid = Array.prototype.filter.call(fields, function (node) {
                                 return !node.hidden && !node.closest('[hidden]') && node.offsetParent !== null;
                             })[0],
                             global = self.$root.querySelector('[data-osc="global-error"]');
@@ -317,7 +327,8 @@
              */
             leaveForSuccess: function () {
                 try {
-                    if (window.hyva && typeof window.hyva.getBrowserStorage === 'function' && window.hyva.getBrowserStorage()) {
+                    if (window.hyva && typeof window.hyva.getBrowserStorage === 'function'
+                        && window.hyva.getBrowserStorage()) {
                         window.hyva.getBrowserStorage().removeItem('mage-cache-storage');
                     }
                 } catch (e) {
@@ -442,9 +453,8 @@
             },
 
             drawErrors: function () {
-                var errors = this.checkout.state.errors;
-
-                var root = this.$root;
+                var errors = this.checkout.state.errors,
+                    root = this.$root;
 
                 Array.prototype.forEach.call(root.querySelectorAll('[data-osc-error]'), function (node) {
                     var message = errors[node.getAttribute('data-osc-error')] || '';
@@ -454,7 +464,11 @@
                         node.textContent = message;
                     }
                 });
-                [['[data-osc="email"]', 'email'], ['[data-osc="po-number"]', 'poNumber'], ['[data-osc="coupon-input"]', 'coupon']].forEach(function (pair) {
+                [
+                    ['[data-osc="email"]', 'email'],
+                    ['[data-osc="po-number"]', 'poNumber'],
+                    ['[data-osc="coupon-input"]', 'coupon']
+                ].forEach(function (pair) {
                     var input = root.querySelector(pair[0]);
 
                     if (!input) {
